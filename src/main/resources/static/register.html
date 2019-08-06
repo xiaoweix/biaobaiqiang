@@ -1,0 +1,326 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>注册</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="styles/iview.css">
+    <script type="text/javascript" src="js/vue.min.js"></script>
+    <script type="text/javascript" src="js/iview.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <style>
+        .header {
+            z-index: 9990;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 48px;
+            line-height: 48px;
+            text-align: center;
+            background-color: lightcoral;
+            color: white;
+            font-weight: 900;
+        }
+
+        .header .title {
+            border-bottom: 2.5px solid #FFFFFF;
+            font-size: 16px;
+        }
+
+        .content {
+            margin-top: 60px;
+        }
+
+        .user-input {
+            padding: 10px 20px 0px 20px;
+            height: 100%;
+            background-color: #f8f8f9;
+        }
+
+        .user-but {
+            padding: 15px 20px 10px 20px;
+            background-color: #f8f8f9;
+        }
+
+        .ivu-input {
+            border: 0px;
+            outline: none;
+        }
+
+        .info {
+            font-size: 13px;
+            color: #808695;
+            padding-top: 11px;
+            line-height: 16px;
+        }
+
+        .top {
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div id="app">
+    <div class="header">
+        <span class="title">表 &nbsp; 白 &nbsp; 墙</span>
+    </div>
+    <div class="content">
+        <div class="steps">
+            <Row type="flex">
+                <i-col :xs="2" :md="5"></i-col>
+                <i-col :xs="22" :md="19">
+                    <Steps :current="current" size="small" :status="error">
+                        <Step title="填写信息" icon="ios-person"></Step>
+                        <Step title="上传头像" icon="ios-camera"></Step>
+                        <Step title="验证邮箱" icon="ios-mail"></Step>
+                    </Steps>
+                </i-col>
+            </Row>
+            <div v-show="current == 0" class="top">
+                <div class="user-input">
+                    <i-input size="large" prefix="ios-person" v-model="user.userName" placeholder="输入昵称" clearable
+                             maxlength="16"/>
+                </div>
+                <div class="user-input">
+                    <i-input type="number" size="large" prefix="ios-phone-portrait" v-model="user.phoneNum"
+                             placeholder="输入手机号"
+                             clearable maxlength="11"/>
+                </div>
+                <div class="user-input">
+                    <i-input type="email" prefix="ios-mail" v-model="user.email" size="large" placeholder="输入邮箱,用来接收验证码"
+                             clearable
+                             maxlength="32"/>
+                </div>
+                <div class="user-input">
+                    <i-input type="password" prefix="md-lock" v-model="user.password" size="large" placeholder="输入密码"
+                             clearable
+                             maxlength="16"/>
+                </div>
+                <div class="user-input">
+                    <i-input type="password" prefix="md-lock" v-model="user.password2" size="large" placeholder="确认密码"
+                             clearable
+                             maxlength="16"/>
+                </div>
+                <div class="user-but">
+                    <i-button type="primary" long @click="nextFunOne(1)" :loading="subBut">下一步</i-button>
+                </div>
+            </div>
+            <div v-show="current == 1" class="top">
+                <div class="user-input">
+                    <div v-if="user.avatarUrl == ''">
+                        <Upload :on-exceeded-size="sizeErr"
+                                :on-success="upSuccess"
+                                :on-error="upError"
+                                :before-upload="upBefore"
+                                multiple
+                                max-size="1024"
+                                type="drag"
+                                action="/update/updateImg">
+                            <div style="padding: 20px 0">
+                                <Icon type="ios-cloud-upload" size="52" style="color: #3399ff"></Icon>
+                                <p>点击选择头像</p>
+                            </div>
+                        </Upload>
+                    </div>
+                    <div v-else class="img">
+                        <Row>
+                            <i-col :xs="8" :md="3" :lg="2">
+                                <img style="border-radius:100px ;" :src="user.avatarUrl" width="100px" height="100px"/>
+                            </i-col>
+                            <i-col span="16" class="userinfo">
+                                <Row>
+                                    <i-col span="24" class="info">
+												<span>
+													<Icon type="ios-person" size="16"/></span>
+                                        <span>{{user.userName}}</span>
+                                    </i-col>
+                                    <i-col span="24" class="info">
+												<span>
+													<Icon type="ios-phone-portrait" size="16"/></span>
+                                        <span>{{user.phoneNum}}</span>
+                                    </i-col>
+                                    <i-col span="24" class="info">
+												<span>
+													<Icon type="ios-mail" size="16"/></span>
+                                        <span>{{user.email}}</span>
+                                    </i-col>
+                                </Row>
+                            </i-col>
+                        </Row>
+                        <Row>
+                            <Divider/>
+                        </Row>
+                        <div class="user-but">
+                            <Row type="flex" justify="space-around">
+                                <i-col span="24">
+                                    <i-button type="primary" long @click="nextFunTwo(2)">下一步</i-button>
+                                </i-col>
+                            </Row>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div v-show="current == 2" class="top">
+                <div class="user-input">
+                    <i-input type="number" prefix="md-barcode" v-model="user.code" size="large" placeholder="邮箱中的验证码"
+                             clearable
+                             maxlength="32"/>
+                </div>
+                <div class="user-but">
+                    <Row type="flex" justify="space-around">
+                        <i-col span="24">
+                            <i-button type="primary" long @click="register" :loading="subBut">完成注册</i-button>
+                        </i-col>
+                    </Row>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            user: {
+                id: '',
+                userName: '',
+                phoneNum: '',
+                email: '',
+                password: '',
+                password2: '',
+                code:'',
+                avatarUrl:''
+            },
+            error: '',
+            current: 0,
+            subBut:false
+        },
+        methods: {
+            register: function () {
+                // 校验验证码
+                if(vm.user.code == ''){
+                    vm.$Message.error("请输入验证码!");
+                    return;
+                }
+                // 校验验证码
+                vm.subBut = true;
+                $.ajax({
+                    type: "POST",
+                    url: "/user/verifCode",
+                    dateType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(vm.user),
+                    success: function (res) {
+                        vm.subBut = false;
+                        if (res.code === 602) {
+                            vm.$Message.error(res.msg);
+                            return;
+                        }
+                        vm.$Message.success("注册成功!");
+                        setTimeout(function() {},2000);
+                        window.location.href = '/login.html';
+                    }
+                });
+            },
+            upBefore: function(file){
+
+            },
+            upError: function () {
+                vm.$Message.error("头像上传失败!");
+                vm.error = 'error';
+                return;
+            },
+            upSuccess: function (res, file,fileList) {
+                if(res.code === 0){
+                    vm.user.avatarUrl = res.img;
+                    vm.$Message.success("头像上传成功!");
+                    vm.error = '';
+                    return;
+                }
+
+                vm.upError();
+
+            },
+            sizeErr: function () {
+                vm.$Message.error("头像最大为1M!");
+                return;
+            },
+            nextFunTwo: function (current) {
+                if (vm.img != '') {
+					vm.current = current;
+                } else {
+                    vm.$Message.error("请上传头像!");
+                }
+            },
+            nextFunOne: function (current) {
+                // 校验
+                var email = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/; // 邮箱
+                var phone = /^1[3|4|5|8][0-9]\d{8}$/; //手机号
+                if (this.user.userName == '') {
+                    vm.$Message.error("请输入昵称!");
+                    return;
+                }
+                if (this.user.phoneNum == '') {
+                    vm.$Message.error("请输入手机号!");
+                    return;
+                }
+                if (!phone.test(this.user.phoneNum)) {
+                    vm.$Message.error("手机号输入有误!");
+                    return false;
+                }
+                if (this.user.email == '') {
+                    vm.$Message.error("请输入邮箱!");
+                    return;
+                }
+                if (!email.test(this.user.email)) {
+                    vm.$Message.error("邮箱输入有误!");
+                    return false;
+                }
+                if (this.user.password == '') {
+                    vm.$Message.error("请输入密码!");
+                    return;
+                }
+                if (this.user.password2 == '') {
+                    vm.$Message.error("请确认密码!");
+                    return;
+                }
+                if (this.user.password2 != this.user.password) {
+                    vm.$Message.error("两次密码输入不一致!");
+                    return;
+                }
+
+                // 校验邮箱是否已经注册
+                vm.subBut = true;
+                $.ajax({
+                    type: "POST",
+                    url: "/user/verifRegiter",
+                    dateType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(vm.user),
+                    success: function (res) {
+                        vm.subBut = false;
+                        if (res.code === 601) {
+                            vm.$Message.error(res.msg);
+                            return;
+                        }
+                        vm.user.id = res.id;
+                        vm.current = current;
+                    }
+                });
+
+            }
+        }
+    });
+    vm.$Message.config({
+        top: 50,
+        duration: 3
+    });
+    vm.$Notice.config({
+        top: 50,
+        duration: 3
+    });
+</script>
+</html>

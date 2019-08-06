@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>登录</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="styles/iview.css">
+    <script type="text/javascript" src="js/vue.min.js"></script>
+    <script type="text/javascript" src="js/iview.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <style>
+        .header {
+            z-index: 9990;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 48px;
+            line-height: 48px;
+            text-align: center;
+            background-color: lightcoral;
+            color: white;
+            font-weight: 900;
+        }
+
+        .header .title {
+            border-bottom: 2.5px solid #FFFFFF;
+            font-size: 16px;
+        }
+
+        .content {
+            margin-top: 60px;
+        }
+        .user-but {
+            padding: 15px 20px 10px 20px;
+            background-color: #f8f8f9;
+        }
+
+        .email {
+            padding-bottom: 10px;
+        }
+
+        .pwd {
+            padding-bottom: 10px;
+        }
+
+        .tishi {
+            padding-top: 10px;
+            text-align: center;
+            color: #808695;
+        }
+        .ivu-input {
+            border: 0px;
+            outline: none;
+        }
+        .user-input {
+            padding: 10px 20px 0px 20px;
+            height: 100%;
+            background-color: #f8f8f9;
+        }
+    </style>
+</head>
+<body style="background-color: #f8f8f9;">
+<div id="app">
+    <div class="header">
+        <span class="title">表 &nbsp; 白 &nbsp; 墙</span>
+    </div>
+    <div class="content">
+        <div class="user-input">
+            <Auto-complete
+                    v-model="user.email"
+                    @on-search="handleSearch"
+                    placeholder="输入你的邮箱"
+                    prefix="md-email"
+                    maxlength="32">
+                <span v-if="data.length!=0"><i-option v-for="item in data" :value="item" :key="item">{{ item }}</i-option></span>
+            </Auto-complete>
+            <!--<i-input type="email" prefix="md-mail" placeholder="输入你的邮箱" clearable v-model="user.email"/>-->
+        </div>
+        <div class="user-input">
+            <i-input type="password" prefix="md-lock" placeholder="输入你的密码" maxlength="16" clearable v-model="user.password"/>
+        </div>
+        <div  class="user-but">
+            <i-button type="primary" icon="md-unlock" long @click="login" :loading="subBut">登录</i-button>
+        </div>
+        <div class="tishi">
+            <a>忘记密码 </a> | <a href="/register.html"> 现在注册</a>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            user: {
+                email: '',
+                password: ''
+            },
+            data: [],
+            subBut: false
+        },
+        methods: {
+            login: function () {
+                if (this.user.email == '') {
+                    vm.$Message.error("请输入邮箱!");
+                    return;
+                }
+                var strRegex = /^(\w-*\.*)+@(\w-?)+(\.\w{2,})+$/;
+                if (!strRegex.test(this.user.email)) {
+                    vm.$Message.error("邮箱输入有误!");
+                    return false;
+                }
+                if (this.user.password == '') {
+                    vm.$Message.error("请输入密码!");
+                    return;
+                }
+
+                vm.subBut = true;
+                $.ajax({
+                    type: "POST",
+                    url: "/user/login",
+                    dateType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.user),
+                    success: function (res) {
+                        vm.subBut = false;
+                        if (res.code === 0) {
+                            vm.$Message.success("登录成功!");
+                            window.location.href = '/index.html';
+                        } else {
+                            vm.$Message.error(res.msg);
+                        }
+                    }
+                });
+
+            },
+            handleSearch: function (value) {
+                this.data = !value || value.indexOf('@') >= 0 ? [] : [
+                    value + '@qq.com',
+                    value + '@163.com',
+                    value + '@126.com'
+                ];
+            }
+        }
+    });
+    vm.$Message.config({
+        top: 50,
+        duration: 3
+    });
+    vm.$Notice.config({
+        top: 50,
+        duration: 3
+    });
+</script>
+</html>

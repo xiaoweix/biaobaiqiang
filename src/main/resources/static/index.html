@@ -1,0 +1,484 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <title>表白墙</title>
+    <link rel="stylesheet" type="text/css" href="styles/iview.css">
+    <link rel="stylesheet" type="text/css" href="css/mescroll.min.css">
+    <script type="text/javascript" src="js/vue.min.js"></script>
+    <script type="text/javascript" src="js/iview.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript" src="js/mescroll.min.js"></script>
+    <style>
+        .card {
+            margin: 5px 13px;
+        }
+
+        .ivu-card-head {
+            padding: 5px 7px;
+        }
+
+        .name {
+            padding-top: 8px;
+            color: #17233d;
+            font-weight: 550;
+        }
+
+        .date {
+            padding-top: 5px;
+            color: #808695;
+            font-size: 10px;
+        }
+
+        .content {
+            color: #515a6e;
+        }
+
+        .border {
+            border-bottom: 1px solid #e8eaec;
+            padding-top: 7px;
+        }
+
+        .bottom {
+            height: 30px;
+            margin-top: 5px;
+        }
+
+        .header {
+            z-index: 9990;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 48px;
+            line-height: 48px;
+            text-align: center;
+
+            background-color: lightcoral;
+            color: white;
+            font-weight: 900;
+        }
+
+        .mescroll {
+            position: fixed;
+            top: 48px;
+            padding-top: 5px;
+            bottom: 0;
+            height: auto;
+        }
+
+        .header .title {
+            border-bottom: 2.5px solid #FFFFFF;
+            font-size: 16px;
+        }
+
+        .header .btn-right {
+            position: absolute;
+            top: 0;
+            right: 0;
+            padding: 0 12px;
+        }
+
+        .ivu-drawer {
+            margin-top: 48px;
+        }
+
+        .button {
+            margin-top: 10px;
+        }
+
+        .drawer-notice {
+            margin: 30px 0px;
+        }
+
+        .ivu-badge-dot {
+            top: 9px;
+            right: -3px;
+        }
+
+        .user-badge .ivu-badge-dot {
+            top: 1px;
+            right: -3px;
+        }
+
+        .col-font {
+            text-align: center;
+            font-size: 8px;
+        }
+
+        .userGird {
+            padding-bottom: 10px;
+        }
+
+        .ivu-col-span-xs-4 {
+            width: 44px;
+        }
+    </style>
+</head>
+<body style="background-color: lightcoral;">
+<div id="app">
+    <div class="header">
+        <span class="title">表 &nbsp; 白 &nbsp; 墙</span>
+        <div class="btn-right" @click="drawer = true">
+            <div v-if="!drawer" @click="countFun">
+                <div v-if="user == null">
+                    <Badge dot :count="count">
+                        <Avatar icon="ios-person"/>
+                    </Badge>
+                </div>
+                <div v-else>
+                    <Badge dot :count="user.count">
+                        <Avatar :src="user.avatarUrl"/>
+                    </Badge>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div v-if="user == null">
+        <Drawer title="注册&登录" v-model="drawer">
+            <i-button type="primary" long class="button" @click="toLogin">登录</i-button>
+            <i-button type="success" long class="button" @click="toRegister">注册</i-button>
+            <div class="drawer-notice">
+                <Card>
+                    <div style="text-align:center">
+                        <span>注册或登录后解锁更多功能~</span>
+                        <br />
+                        <br />
+                        <span>主要实现了页面下拉刷新上拉加载；登录、注册、发布、点赞等功能</span>
+                        <br />
+                        <br />
+                        <span>手机浏览器体验更佳！</span>
+                    </div>
+                </Card>
+            </div>
+        </Drawer>
+    </div>
+    <div v-else>
+        <Drawer :title="user.userName" v-model="drawer">
+            <div>
+                <Row type="flex" justify="space-around" class="userGird">
+                    <i-col span="4" class="col-font">
+                        <span><Icon type="md-aperture" size="37" color="#ed4014"/></span>
+                        <span>我发布的</span>
+                    </i-col>
+                    <i-col span="4" class="col-font">
+                        <span><Icon type="ios-heart" size="37" color="red"/></span>
+                        <span>我的喜欢</span>
+                    </i-col>
+                    <i-col span="4" class="col-font">
+                        <span><Badge dot count="1" class="user-badge"><Icon type="md-megaphone" size="37"
+                                                                            color="#fcaf17"/></Badge></span>
+                        <span>我的消息</span>
+                    </i-col>
+                </Row>
+                <Row type="flex" justify="space-around">
+                    <i-col span="4" class="col-font">
+                        <span><Icon type="ios-bug" size="37" color="#009ad6"/></span>
+                        <span>问题反馈</span>
+                    </i-col>
+                    <i-col span="4" class="col-font">
+                        <span><Icon type="md-share" size="37" color="#d3c6a6"/></span>
+                        <span>分享墙墙</span>
+                    </i-col>
+                    <i-col span="4" class="col-font">
+                        <span><Icon type="ios-cog" size="37" color="#17233d"/></span>
+                        <span>我的设置</span>
+                    </i-col>
+                </Row>
+            </div>
+            <div class="drawer-notice">
+                <Card>
+                    <div style="text-align:center">
+                        <span>上面功能暂未开放点击无反应</span>
+                    </div>
+                </Card>
+            </div>
+            <i-button type="error" long class="button" @click="logout">退出</i-button>
+        </Drawer>
+    </div>
+    <div id="mescroll" class="mescroll">
+        <Row>
+            <i-col span="24" v-for="item in list">
+                <Card :bordered="false" dis-hover class="card" padding="7" :style="{'border-bottom' : item.color}">
+                    <div slot="title">
+                        <Row>
+                            <i-col :xs="4" :md="1" :sm="1" :lg="1" :xl="1" :xxl="1">
+                                <Avatar :src="item.avatarUrl" size="large"/>
+                            </i-col>
+                            <i-col span="20">
+                                <Row>
+                                    <i-col span="24" class="name">
+                                        <span>{{item.userName}}</span>
+                                    </i-col>
+                                    <i-col span="24" class="date">
+                                        <span><i-time :time="item.createDate" type="datetime"/></span>
+                                    </i-col>
+                                </Row>
+                            </i-col>
+                        </Row>
+                    </div>
+                    <div class="content">
+                        {{item.content}}
+                    </div>
+                    <div class="border"></div>
+                    <div class="bottom">
+                        <div style="float:left">
+                            <Tag color="blue">
+										<span>
+											<Icon type="md-pin" size="13"/>
+										</span>
+                                <span>{{item.city}}</span>
+                            </Tag>
+                        </div>
+                        <div style="float:right">
+									<span v-if="item.like">
+										<Icon type="ios-heart" size="30" color="red"/>
+									</span>
+                            <span v-else>
+										<Icon type="ios-heart-outline" size="30" color="red" @click="likeFun(item)"/>
+									</span>
+                        </div>
+                    </div>
+                </Card>
+            </i-col>
+        </Row>
+        <div id="lod"></div>
+    </div>
+    <div style="position: fixed; cursor: pointer; right: 8px; top: 80%;" @click="addFun()">
+        <Icon type="md-create" size="38" color="#17233d"/>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            list: [],
+            drawer: false,
+            user: {},
+            count: 1
+        },
+        created: function () {
+            $.ajax({
+                type: "GET",
+                url: "/user/getSeUser",
+                dateType: "json",
+                success: function (r) {
+                    if (r.code === 0) {
+                        vm.user = r.user;
+                    }
+                }
+            });
+        },
+        methods: {
+            likeFun: function (item) {
+                if (vm.user == null) {
+                    vm.$Modal.confirm({
+                        title: "您还未登录",
+                        content: "登录后可使用全部功能是否现在去登录？",
+                        okText: '好的',
+                        cancelText: '不了',
+                        onOk: function () {
+                            window.location.href = '/login.html';
+                        },
+                        onCancel: function () {
+
+                        }
+                    });
+                    return;
+                }
+                if (!item.like) {
+                    item.like = !item.like;
+                    var data = {
+                        "userId": this.user.id,
+                        "listId": item.id
+                    };
+                    // 修改
+                    $.ajax({
+                        type: "POST",
+                        url: "/listLike/add",
+                        dateType: "json",
+                        contentType: "application/json",
+                        data: JSON.stringify(data),
+                        success: function (r) {
+                            if (r.code === 0) {
+
+                            } else {
+                                vm.$Message.error(r.msg);
+                            }
+                        }
+                    });
+                }
+            },
+            addFun: function () {
+                window.location.href = '/insert.html';
+            },
+            toLogin: function () {
+                window.location.href = '/login.html';
+            },
+            toRegister: function () {
+                window.location.href = '/register.html';
+            },
+            countFun: function () {
+                if (vm.user == null) {
+                    vm.count = 0;
+                    return;
+                }
+                vm.user.count = 0;
+                // 修改
+            },
+            logout: function () {
+                $.ajax({
+                    type: "GET",
+                    url: "/user/logout",
+                    dateType: "json",
+                    success: function (r) {
+                        if (r.code === 0) {
+                            vm.$Message.success("已安全退出!");
+                            vm.user = null;
+                        } else {
+                            vm.$Message.error(r.msg);
+                        }
+                    }
+                });
+            }
+        }
+    });
+    vm.$Message.config({
+        top: 50,
+        duration: 3
+    });
+    vm.$Notice.config({
+        top: 50,
+        duration: 3
+    });
+
+    var mescroll = new MeScroll("mescroll", {
+        /*down: {
+            auto: false, //是否在初始化完毕之后自动执行下拉回调callback; 默认true
+            callback: downCallback //下拉刷新的回调
+        },*/
+        up: {
+            auto: true, //是否在初始化时以上拉加载的方式自动加载第一页数据; 默认false
+            isBounce: false, //此处禁止ios回弹,解析(务必认真阅读,特别是最后一点): http://www.mescroll.com/qa.html#q10
+            callback: upCallback, //上拉回调,此处可简写; 相当于 callback: function (page) { upCallback(page); }
+            toTop: { //配置回到顶部按钮
+                src: "images/top.png", //默认滚动到1000px显示,可配置offset修改
+                //offset : 1000
+            },
+            warpId: "lod", // 底部加载中
+            htmlNodata: '<p class="upwarp-nodata">--- 人家也是有底线的 ---</p>',
+            empty: {
+                warpId: "lod",
+                icon: null,
+                tip: "暂无相关数据~",
+                btntext: "",
+                btnClick: null,
+                supportTap: false
+            }
+        }
+    });
+
+    /*下拉刷新的回调 */
+    function downCallback() {
+        //联网加载数据
+        getListDataFromNet(0, 10, function (data) {
+            //联网成功的回调,隐藏下拉刷新的状态
+            mescroll.endByPage(data.list.length, data.totalPage); //必传参数(当前页的数据个数, 总页数)
+            //设置列表数据
+            setListData(data, false);
+        }, function () {
+            //联网失败的回调,隐藏下拉刷新的状态
+            mescroll.endErr();
+        });
+    }
+
+    /*上拉加载的回调 page = {num:1, size:10}; num:当前页 从1开始, size:每页数据条数 */
+    function upCallback(page) {
+        //联网加载数据
+        getListDataFromNet(page.num, page.size, function (curPageData) {
+            //联网成功的回调,隐藏下拉刷新和上拉加载的状态;
+            //mescroll会根据传的参数,自动判断列表如果无任何数据,则提示空;列表无下一页数据,则提示无更多数据;
+            // console.log("page.num=" + page.num + ", page.size=" + page.size + ", curPageData.length=" + curPageData.length);
+
+            //方法一(推荐): 后台接口有返回列表的总页数 totalPage
+            mescroll.endByPage(curPageData.list.length, curPageData.totalPage); //必传参数(当前页的数据个数, 总页数)
+
+            //方法二(推荐): 后台接口有返回列表的总数据量 totalSize
+            //mescroll.endBySize(curPageData.length, totalSize); //必传参数(当前页的数据个数, 总数据量)
+
+            //方法三(推荐): 您有其他方式知道是否有下一页 hasNext
+            //mescroll.endSuccess(curPageData.length, hasNext); //必传参数(当前页的数据个数, 是否有下一页true/false)
+
+            //方法四 (不推荐),会存在一个小问题:比如列表共有20条数据,每页加载10条,共2页.如果只根据当前页的数据个数判断,则需翻到第三页才会知道无更多数据,如果传了hasNext,则翻到第二页即可显示无更多数据.
+            // mescroll.endSuccess(curPageData.length);
+
+            //提示:curPageData.length必传的原因:
+            // 1.判断是否有下一页的首要依据: 当传的值小于page.size时,则一定会认为无更多数据.
+            // 2.比传入的totalPage, totalSize, hasNext具有更高的判断优先级
+            // 3.使配置的noMoreSize生效
+
+            //设置列表数据
+            setListData(curPageData.list, curPageData.currPage!=1);
+        }, function () {
+            //联网失败的回调,隐藏下拉刷新和上拉加载的状态;
+            mescroll.endErr();
+        });
+    }
+
+    /*设置列表数据*/
+    function setListData(curPageData, isAppend) {
+        if (isAppend) {
+            for (var i = 0; i < curPageData.length; i++) {
+                vm.list.push(curPageData[i]);
+            }
+
+        } else {
+            vm.list = curPageData;
+        }
+
+    }
+
+    /*联网加载列表数据
+     在您的实际项目中,请参考官方写法: http://www.mescroll.com/api.html#tagUpCallback
+     请忽略getListDataFromNet的逻辑,这里仅仅是在本地模拟分页数据,本地演示用
+     实际项目以您服务器接口返回的数据为准,无需本地处理分页.
+     * */
+
+    function getListDataFromNet(pageNum, pageSize, successCallback, errorCallback) {
+        //延时一秒,模拟联网
+        try {
+            data = {
+                "pageNo": pageNum,
+                "pageSize": pageSize,
+                "userId": vm.user != null ? vm.user.id : ''
+            };
+            // 分页
+            $.ajax({
+                type: "POST",
+                url: "/listContent/list",
+                dateType: "json",
+                contentType: "application/json",
+                data: JSON.stringify(data),
+                success: function (r) {
+                    if (r.code === 0) {
+                        if (r.page.list.length != 0) {
+                            vm.$Message.success("叮~ 新加载了" + r.page.list.length + "条信息");
+                            //联网成功的回调
+                            successCallback && successCallback(r.page);
+                        }
+                    } else {
+                        mescroll.endErr();
+                        vm.$Message.error(r.msg);
+                    }
+                }
+            });
+        } catch (e) {
+            //联网失败的回调
+            errorCallback && errorCallback();
+        }
+    }
+</script>
+</html>

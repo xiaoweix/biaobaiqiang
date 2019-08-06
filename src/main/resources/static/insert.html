@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8">
+    <title>发表</title>
+    <meta name="viewport"
+          content="width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no"/>
+    <link rel="stylesheet" type="text/css" href="styles/iview.css">
+    <script type="text/javascript" src="js/vue.min.js"></script>
+    <script type="text/javascript" src="js/iview.min.js"></script>
+    <script type="text/javascript" src="js/jquery.min.js"></script>
+    <script type="text/javascript"
+            src="https://webapi.amap.com/maps?v=1.4.15&key=252054fd38f0ab9ad1ff64fbcb42e7fa"></script>
+    <style>
+        .header {
+            z-index: 9990;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 48px;
+            line-height: 48px;
+            text-align: center;
+            background-color: lightcoral;
+            color: white;
+            font-weight: 900;
+        }
+
+        .header span {
+            border-bottom: 2.5px solid #FFFFFF;
+            font-size: 16px;
+        }
+
+        .content {
+            margin-top: 60px;
+        }
+
+        .city {
+            margin: 10px;
+        }
+        .user-input {
+            padding: 10px 20px 0px 20px;
+            height: 100%;
+            background-color: #f8f8f9;
+        }
+
+        .user-but {
+            padding: 15px 20px 10px 20px;
+            background-color: #f8f8f9;
+        }
+
+        .ivu-input {
+            border: 0px;
+            outline: none;
+        }
+    </style>
+</head>
+<body style="background-color: #f8f8f9;">
+<div id="app">
+    <div class="header">
+        <span>表 &nbsp; 白 &nbsp; 墙</span>
+    </div>
+    <div class="content">
+        <div class="user-input">
+            <i-input type="textarea" :autosize="{minRows: 6,maxRows: 10}" placeholder="输入你想说的话..."
+                     v-model="list.content"/>
+        </div>
+        <div class="user-input">
+            <i-button type="primary" icon="md-pin" @click="getCity">
+                <span v-if="list.city == ''" :loading="cityBut">点击获取当前位置</span>
+                <span v-else>{{list.city}}</span>
+            </i-button>
+        </div>
+        <div class="user-but">
+            <i-button type="success" long @click="addFun" :loading="subBut">发表</i-button>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    var vm = new Vue({
+        el: '#app',
+        data: {
+            list: {
+                content: '',
+                city: '',
+                userId:''
+            },
+            user: {},
+            colors: [
+                '4px solid #2d8cf0',
+                '4px solid #5cadff',
+                '4px solid #2b85e4',
+                '4px solid #2db7f5',
+                '4px solid #19be6b',
+                '4px solid #ff9900',
+                '4px solid #ed4014',
+                '4px solid #17233d',
+                '4px solid #515a6e'
+
+            ],
+            cityBut: false,
+            subBut: false
+        },
+        created: function () {
+            $.ajax({
+                type: "GET",
+                url: "/user/getSeUser",
+                dateType: "json",
+                success: function (r) {
+                    if (r.code === 0) {
+                        vm.user = r.user;
+                        if(vm.user!=null){
+                            vm.list.userId = vm.user.id;
+                        }
+                    }
+                }
+            });
+        },
+        methods: {
+            addFun: function () {
+                if (this.list.content == '') {
+                    vm.$Message.error("请输入想说的话!");
+                    return;
+                }
+                if (this.list.city == '') {
+                    vm.$Message.error("请获取你的城市!");
+                    return;
+                }
+                if(this.user==null || this.list.userId == ''){
+                    vm.$Modal.confirm({
+                        title: "您还未登录",
+                        content: "登录后可使用全部功能是否现在去登录？",
+                        okText: '好的',
+                        cancelText: '不了',
+                        onOk: function () {
+                            window.location.href = '/login.html';
+                        },
+                        onCancel: function () {
+
+                        }
+                    });
+                    return;
+                }
+                var num = Math.floor(Math.random() * 8);
+                this.list.color = this.colors[num];
+                vm.subBut = true;
+                $.ajax({
+                    type: "POST",
+                    url: "/listContent/add",
+                    dateType: "json",
+                    contentType: "application/json",
+                    data: JSON.stringify(this.list),
+                    success: function (r) {
+
+                        vm.subBut = false;
+                        if (r.code === 0) {
+                            vm.$Message.success("发表成功");
+                            window.location.href = '/index.html';
+                            return;
+                        }
+                        var res = JSON.parse(r);
+                        if (res.code == 501) {
+                            vm.$Modal.confirm({
+                                title: "您还未登录",
+                                content: "登录后即可使用全部功能，是否现在去登录？",
+                                cancelText: '不了',
+                                onOk: function () {
+                                    window.location.href = '/login.html';
+                                },
+                                onCancel: function () {
+
+                                }
+                            });
+                        } else {
+                            vm.$Message.error(res.msg);
+                        }
+                    }
+                });
+
+            }
+        }
+    });
+
+    vm.$Message.config({
+        top: 50,
+        duration: 3
+    });
+    vm.$Notice.config({
+        top: 50,
+        duration: 3
+    });
+
+    function getCity() {
+        vm.cityBut = true;
+        AMap.plugin('AMap.CitySearch', function () {
+            var citySearch = new AMap.CitySearch()
+            citySearch.getLocalCity(function (status, result) {
+                if (status === 'complete' && result.info === 'OK') {
+                    // 查询成功，result即为当前所在城市信息
+                    vm.list.city = result.city + "·" + result.province;
+                } else {
+                    vm.$Message.error("获取定位失败，请稍后重试!");
+                }
+                vm.cityBut = false;
+            })
+        })
+    }
+</script>
+</html>

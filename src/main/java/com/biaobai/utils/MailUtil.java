@@ -8,7 +8,7 @@ import java.util.Properties;
 
 public class MailUtil {
     public static void main(String[] args) {
-        sendMail("2247045996@qq.com","123");
+        sendMail("65238004@qq.com","123");
     }
 
     /**
@@ -20,7 +20,8 @@ public class MailUtil {
     public static void sendMail(String to, String code) {
         // Session对象:
         Properties props = new Properties();
-        props.setProperty("mail.smtp.host", "smtp.163.com"); // 设置主机地址
+        props.setProperty("mail.smtp.host", "smtp.126.com"); // 设置主机地址
+        // smtp.163.com
         // smtp.qq.com
         // smtp.sina.com
         props.setProperty("mail.smtp.auth", "true");// 认证
@@ -33,7 +34,7 @@ public class MailUtil {
         try {
 
             // 4.设置消息的发送者
-            Address fromAddr = new InternetAddress("biaobaiqiangqiang@163.com");
+            Address fromAddr = new InternetAddress("xwlovewall@126.com");
             message.setFrom(fromAddr);
 
             // 5.设置消息的接收者
@@ -49,7 +50,8 @@ public class MailUtil {
             // 8.准备发送，得到火箭
             Transport transport = session.getTransport("smtp");
             // 9.设置火箭的发射目标
-            transport.connect("smtp.163.com", "biaobaiqiangqiang@163.com", "biaobaiqiang123");
+            //transport.connect("smtp.163.com", "biaobaiqiangqiang@163.com", "biaobaiqiang123");
+            transport.connect("smtp.126.com", "xwlovewall@126.com", "xxw2019");
             // 10.发送
             transport.sendMessage(message, message.getAllRecipients());
 

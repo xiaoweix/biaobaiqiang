@@ -15,6 +15,8 @@ import com.biaobai.domain.ListQuery;
  * @since 2019-07-18
  */
 public interface IListContentService extends IService<ListContent> {
+
     Page<ListContentListVO> page(ListQuery query);
+
     int add(ListContentListVO vo);
 }

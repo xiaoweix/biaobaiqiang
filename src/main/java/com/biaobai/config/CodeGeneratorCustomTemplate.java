@@ -38,12 +38,12 @@ public class CodeGeneratorCustomTemplate {
 
     private void generateByTablesWithInjectConfig(String packageName, String... tableNames) {
         GlobalConfig config = new GlobalConfig();
-        String dbUrl = "jdbc:mysql://127.0.0.1:3306/bbq";
+        String dbUrl = "jdbc:mysql://39.105.45.77:3306/bbq";
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setDbType(DbType.MYSQL)
                 .setUrl(dbUrl)
                 .setUsername("root")
-                .setPassword("12345678")
+                .setPassword("xxw+2019")
                 .setDriverName("com.mysql.jdbc.Driver");
         StrategyConfig strategyConfig = new StrategyConfig();
         strategyConfig

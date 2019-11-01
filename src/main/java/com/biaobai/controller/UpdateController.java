@@ -15,7 +15,7 @@ public class UpdateController {
     @PostMapping("/updateImg")
     public R updateImg(MultipartFile file) {
         try {
-            String path = "/Users/zhujingchun/image";
+            String path = "/Users/tusdao_xxw/Pictures";
             String image = Upload.uploadImages(file, path);
             return R.ok().put("img", "/avatarUrl/" + image);
         } catch (Exception e) {
